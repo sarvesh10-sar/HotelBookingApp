@@ -1,6 +1,6 @@
 import java.util.*;
 
-// Reservation Class (Represents booking request)
+// Reservation Class
 class Reservation {
     private String guestName;
     private String roomType;
@@ -19,51 +19,44 @@ class Reservation {
     }
 }
 
-// Booking Request Queue Service
+// Booking Queue (FIFO)
 class BookingQueue {
-    private Queue<Reservation> queue;
+    private Queue<Reservation> queue = new LinkedList<>();
 
-    public BookingQueue() {
-        queue = new LinkedList<>();
+    // Add request
+    public void addRequest(Reservation r) {
+        queue.offer(r);
+        System.out.println("Request added: " + r.getGuestName());
     }
 
-    // Add request to queue (FIFO)
-    public void addRequest(Reservation reservation) {
-        queue.offer(reservation);
-        System.out.println("Booking request added for " + reservation.getGuestName());
-    }
-
-    // View all queued requests
+    // Show queue
     public void showQueue() {
-        System.out.println("\nCurrent Booking Queue:");
+        System.out.println("\nBooking Queue:");
         for (Reservation r : queue) {
             System.out.println(r.getGuestName() + " -> " + r.getRoomType());
         }
     }
 
-    // Get next request (for future UC6 processing)
-    public Reservation getNextRequest() {
-        return queue.peek(); // only view, not remove
+    // Peek next request
+    public Reservation getNext() {
+        return queue.peek();
     }
 }
 
-// Main Class
+// Main class
 public class Main {
     public static void main(String[] args) {
 
         BookingQueue bookingQueue = new BookingQueue();
 
-        // Guest booking requests
         bookingQueue.addRequest(new Reservation("Alice", "Single"));
         bookingQueue.addRequest(new Reservation("Bob", "Suite"));
         bookingQueue.addRequest(new Reservation("Charlie", "Double"));
 
-        // Display queue (FIFO order)
         bookingQueue.showQueue();
 
-        // Show next request (without removing)
-        Reservation next = bookingQueue.getNextRequest();
-        System.out.println("\nNext request to process: "
+        Reservation next = bookingQueue.getNext();
+        System.out.println("\nNext Request: "
                 + next.getGuestName() + " -> " + next.getRoomType());
     }
 }
