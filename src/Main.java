@@ -1,106 +1,98 @@
-abstract class Room {
-    protected String name;
-    protected int price;
-    protected int beds;
+import java.util.*;
 
-    public Room(String name, int price, int beds) {
-        this.name = name;
+// Room Model
+class Room {
+    private String roomType;
+    private double price;
+    private String amenities;
+
+    public Room(String roomType, double price, String amenities) {
+        this.roomType = roomType;
         this.price = price;
-        this.beds = beds;
+        this.amenities = amenities;
     }
 
-    public String getName() {
-        return name;
+    public String getRoomType() {
+        return roomType;
     }
 
-    public int getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public int getBeds() {
-        return beds;
-    }
-
-    public void showDetails() {
-        System.out.println("Room: " + name + " | Beds: " + beds + " | Price: ₹" + price);
+    public String getAmenities() {
+        return amenities;
     }
 }
 
-// UC2 – Room Types
-class SingleRoom extends Room {
-    public SingleRoom() {
-        super("Single Room", 1500, 1);
+// Inventory (State Holder)
+class Inventory {
+    private Map<String, Integer> roomAvailability = new HashMap<>();
+
+    public Inventory() {
+        roomAvailability.put("Single", 5);
+        roomAvailability.put("Double", 0);
+        roomAvailability.put("Suite", 3);
+    }
+
+    // Read-only access
+    public Map<String, Integer> getAvailability() {
+        return roomAvailability;
     }
 }
 
-class DoubleRoom extends Room {
-    public DoubleRoom() {
-        super("Double Room", 2500, 2);
-    }
-}
+// Search Service (UC4 Logic)
+class SearchService {
+    private Inventory inventory;
 
-class SuiteRoom extends Room {
-    public SuiteRoom() {
-        super("Suite Room", 5000, 3);
-    }
-}
-
-// UC3 – Central Inventory
-import java.util.HashMap;
-
-class RoomInventory {
-    private HashMap<String, Integer> inventory;
-
-    public RoomInventory() {
-        inventory = new HashMap<>();
-        inventory.put("Single Room", 3);
-        inventory.put("Double Room", 2);
-        inventory.put("Suite Room", 1);
+    public SearchService(Inventory inventory) {
+        this.inventory = inventory;
     }
 
-    public int getAvailability(String roomType) {
-        return inventory.getOrDefault(roomType, 0);
-    }
+    public List<Room> searchAvailableRooms(List<Room> rooms) {
+        List<Room> availableRooms = new ArrayList<>();
 
-    public HashMap<String, Integer> getAll() {
-        return inventory;
-    }
-}
+        Map<String, Integer> availability = inventory.getAvailability();
 
-// UC4 – Room Search Service (READ ONLY)
-class RoomSearchService {
+        for (Room room : rooms) {
+            int count = availability.getOrDefault(room.getRoomType(), 0);
 
-    public void showAvailableRooms(RoomInventory inventory) {
-        System.out.println("\n----- Available Rooms -----");
-
-        Room[] rooms = {
-                new SingleRoom(),
-                new DoubleRoom(),
-                new SuiteRoom()
-        };
-
-        for (Room r : rooms) {
-            int available = inventory.getAvailability(r.getName());
-
-            if (available > 0) {
-                r.showDetails();
-                System.out.println("Available: " + available + "\n");
+            // Validation → only available rooms
+            if (count > 0) {
+                availableRooms.add(room);
             }
         }
+
+        return availableRooms;
     }
 }
 
-// MAIN APP
+// Main Class
 public class Main {
     public static void main(String[] args) {
 
-        System.out.println("=== Hotel Booking App ===");
-        System.out.println("Version 1.0\n");
+        // Inventory setup
+        Inventory inventory = new Inventory();
 
-        RoomInventory inventory = new RoomInventory();
+        // Room data (Domain Model)
+        List<Room> rooms = Arrays.asList(
+                new Room("Single", 1000, "WiFi, TV"),
+                new Room("Double", 2000, "WiFi, TV, AC"),
+                new Room("Suite", 5000, "WiFi, TV, AC, Jacuzzi")
+        );
 
-        // **UC4 Search**
-        RoomSearchService searchService = new RoomSearchService();
-        searchService.showAvailableRooms(inventory);
+        // Search Service
+        SearchService searchService = new SearchService(inventory);
+
+        // Perform Search
+        List<Room> availableRooms = searchService.searchAvailableRooms(rooms);
+
+        // Display Results
+        System.out.println("Available Rooms:");
+        for (Room room : availableRooms) {
+            System.out.println(room.getRoomType() +
+                    " - ₹" + room.getPrice() +
+                    " | Amenities: " + room.getAmenities());
+        }
     }
 }
