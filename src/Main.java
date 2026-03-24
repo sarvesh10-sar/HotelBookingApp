@@ -1,63 +1,68 @@
-abstract class Room {
-    String roomType;
-    int beds;
-    double price;
-
-    Room(String roomType, int beds, double price) {
-        this.roomType = roomType;
-        this.beds = beds;
-        this.price = price;
-    }
-
-    void displayInfo() {
-        System.out.println("Room Type: " + roomType);
-        System.out.println("Beds: " + beds);
-        System.out.println("Price: ₹" + price);
-        System.out.println("------------------------");
-    }
-}
-
-class SingleRoom extends Room {
-    SingleRoom() {
-        super("Single Room", 1, 1500);
-    }
-}
-
-class DoubleRoom extends Room {
-    DoubleRoom() {
-        super("Double Room", 2, 2500);
-    }
-}
-
-class SuiteRoom extends Room {
-    SuiteRoom() {
-        super("Suite Room", 3, 4500);
-    }
-}
+import java.util.HashMap;
 
 public class Main {
+
+    // Centralized Inventory Class (Inner Class so everything is in 1 file)
+    static class RoomInventory {
+
+        private HashMap<String, Integer> inventory;
+
+        // Constructor
+        public RoomInventory() {
+            inventory = new HashMap<>();
+        }
+
+        // Add room type
+        public void addRoomType(String roomType, int count) {
+            inventory.put(roomType, count);
+        }
+
+        // Check availability
+        public int getAvailability(String roomType) {
+            return inventory.getOrDefault(roomType, 0);
+        }
+
+        // Book a room
+        public void bookRoom(String roomType) {
+            int available = inventory.getOrDefault(roomType, 0);
+
+            if (available > 0) {
+                inventory.put(roomType, available - 1);
+                System.out.println("✔ Room booked: " + roomType);
+            } else {
+                System.out.println("❌ No rooms available for: " + roomType);
+            }
+        }
+
+        // Display inventory
+        public void displayInventory() {
+            System.out.println("\n--- Current Room Inventory ---");
+            for (String type : inventory.keySet()) {
+                System.out.println(type + " : " + inventory.get(type));
+            }
+        }
+    }
+
+    // MAIN PROGRAM
     public static void main(String[] args) {
 
-        System.out.println("🏨 Hotel Room Types & Availability (UC2)");
+        RoomInventory inventory = new RoomInventory();
 
-        // Static availability
-        int availableSingle = 5;
-        int availableDouble = 3;
-        int availableSuite = 2;
+        // Initialize room types
+        inventory.addRoomType("Single", 5);
+        inventory.addRoomType("Double", 3);
+        inventory.addRoomType("Suite", 2);
 
-        // Create room objects
-        Room r1 = new SingleRoom();
-        Room r2 = new DoubleRoom();
-        Room r3 = new SuiteRoom();
+        // Display inventory
+        inventory.displayInventory();
 
-        // Display Info
-        r1.displayInfo();
-        System.out.println("Availability: " + availableSingle);
+        // Book rooms
+        inventory.bookRoom("Single");
+        inventory.bookRoom("Suite");
+        inventory.bookRoom("Suite");
+        inventory.bookRoom("Suite");  // No rooms left
 
-        r2.displayInfo();
-        System.out.println("Availability: " + availableDouble);
-
-        r3.displayInfo();
-        System.out.println("Availability: " + availableSuite);
+        // Display again
+        inventory.displayInventory();
     }
-}/
+}
